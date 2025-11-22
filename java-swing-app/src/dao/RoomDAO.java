@@ -87,4 +87,40 @@ public class RoomDAO {
             return false;
         }
     }
+
+    // Update room
+    public boolean updateRoom(Room room) {
+        String sql = "UPDATE rooms SET room_name = ?, description = ?, building_id = ? WHERE room_id = ?";
+
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, room.getRoomName());
+            stmt.setString(2, room.getDescription());
+            stmt.setInt(3, room.getBuildingId());
+            stmt.setInt(4, room.getRoomId());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Delete room
+    public boolean deleteRoom(int roomId) {
+        String sql = "DELETE FROM rooms WHERE room_id = ?";
+
+        try (Connection conn = getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, roomId);
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

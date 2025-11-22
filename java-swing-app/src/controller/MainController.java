@@ -123,8 +123,7 @@ public class MainController {
                 building.getBuildingId(),
                 rating,
                 review
-            );
-            
+            );          
             boolean success = ratingDAO.submitRating(ratingObj);
             
             if (success) {
@@ -139,4 +138,23 @@ public class MainController {
             return false;
         }
     }
+
+    // ---------------- Room CRUD ---------------- //
+        public boolean addRoom(Room room) {
+            return roomDAO.addRoom(room);
+        }
+
+        public boolean updateRoom(Room room) {
+            return roomDAO.updateRoom(room);
+        }
+
+        public boolean deleteRoom(int roomId) {
+            return roomDAO.deleteRoom(roomId);
+        }
+
+        public List<Room> getRoomsByBuilding(int buildingId) {
+            return roomDAO.getRoomsByBuildingId(buildingId);
+        }
+
+            
 }
