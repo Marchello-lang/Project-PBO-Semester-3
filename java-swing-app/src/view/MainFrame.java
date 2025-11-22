@@ -21,7 +21,7 @@ public class MainFrame extends JFrame {
         this.currentUser = user;
         this.buildings = controller.getBuildings();
         
-        setTitle("Campus Map - " + user.getUsername() + " (" + getRoleDisplay() + ")");
+        setTitle("RevaUPNVJ - " + user.getUsername() + " (" + getRoleDisplay() + ")");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -54,25 +54,37 @@ public class MainFrame extends JFrame {
         panel.setBackground(getFacultyColor());
         panel.setPreferredSize(new Dimension(1200, 70));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        
-        // Title
-        JLabel titleLabel = new JLabel("PETA KAMPUS INTERAKTIF");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+
+        // Logo
+        ImageIcon icon = new ImageIcon(getClass().getResource("/assets/UPN.PNG"));
+        Image img = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(img);
+        JLabel iconLabel = new JLabel(scaledIcon);
+
+        // Text
+        JLabel titleLabel = new JLabel("RevaUPNVJ");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
-        
+
+        // LEFT group (logo + title)
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftPanel.setOpaque(false);
+        leftPanel.add(iconLabel);
+        leftPanel.add(titleLabel);
+
         // User info
         JPanel userInfoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         userInfoPanel.setOpaque(false);
-        
+
         String userText = currentUser.getUsername();
         if (!currentUser.isGuest() && !currentUser.isAdmin()) {
             userText += " - " + currentUser.getFaculty();
         }
-        
+
         JLabel userLabel = new JLabel(userText);
         userLabel.setFont(new Font("Arial", Font.BOLD, 14));
         userLabel.setForeground(Color.WHITE);
-        
+
         JButton logoutButton = new JButton("Logout");
         logoutButton.setBackground(Color.WHITE);
         logoutButton.setForeground(getFacultyColor());
@@ -84,20 +96,20 @@ public class MainFrame extends JFrame {
                 "Apakah Anda yakin ingin logout?",
                 "Konfirmasi Logout",
                 JOptionPane.YES_NO_OPTION);
-            
+
             if (confirm == JOptionPane.YES_OPTION) {
                 dispose();
                 new LoginSelectionFrame();
             }
         });
-        
+
         userInfoPanel.add(userLabel);
         userInfoPanel.add(Box.createHorizontalStrut(15));
         userInfoPanel.add(logoutButton);
-        
-        panel.add(titleLabel, BorderLayout.WEST);
+
+        panel.add(leftPanel, BorderLayout.WEST);
         panel.add(userInfoPanel, BorderLayout.EAST);
-        
+
         return panel;
     }
     

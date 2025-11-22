@@ -108,6 +108,8 @@ public class RatingDialog extends JDialog {
         submitButton.setFont(new Font("Arial", Font.BOLD, 14));
         submitButton.setBackground(new Color(42, 115, 50));
         submitButton.setForeground(Color.WHITE);
+        submitButton.setContentAreaFilled(false);
+        submitButton.setOpaque(true);
         submitButton.setPreferredSize(new Dimension(150, 40));
         submitButton.setFocusPainted(false);
         submitButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -117,6 +119,8 @@ public class RatingDialog extends JDialog {
         cancelButton.setFont(new Font("Arial", Font.BOLD, 14));
         cancelButton.setBackground(Color.GRAY);
         cancelButton.setForeground(Color.WHITE);
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setOpaque(true);
         cancelButton.setPreferredSize(new Dimension(100, 40));
         cancelButton.setFocusPainted(false);
         cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));

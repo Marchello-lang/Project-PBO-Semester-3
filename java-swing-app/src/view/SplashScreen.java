@@ -2,70 +2,85 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-/**
- * Splash Screen - Tampilan awal saat aplikasi dibuka
- * Ditampilkan selama 2 detik sebelum ke LoginSelectionFrame
- */
-public class SplashScreen extends JWindow {
-    
+public class SplashScreen extends JFrame {
+
+    private float alpha = 0.0f;       // transparansi logo
+    private boolean fadingIn = true;  // status animasi
+
     public SplashScreen() {
-        // Create content panel
-        JPanel content = new JPanel();
-        content.setBackground(new Color(42, 115, 50)); // Warna hijau kampus
-        content.setLayout(new BorderLayout());
-        
-        // Logo/Title
-        JLabel title = new JLabel("CAMPUS MAP", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 48));
-        title.setForeground(Color.WHITE);
-        
-        JLabel subtitle = new JLabel("Interactive Campus Navigation System", SwingConstants.CENTER);
-        subtitle.setFont(new Font("Arial", Font.PLAIN, 18));
-        subtitle.setForeground(Color.WHITE);
-        
-        // Loading indicator
-        JLabel loading = new JLabel("Loading...", SwingConstants.CENTER);
-        loading.setFont(new Font("Arial", Font.ITALIC, 14));
-        loading.setForeground(Color.WHITE);
-        
-        // Add components
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBackground(new Color(42, 115, 50));
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(100, 50, 100, 50));
-        
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loading.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        centerPanel.add(title);
-        centerPanel.add(Box.createVerticalStrut(20));
-        centerPanel.add(subtitle);
-        centerPanel.add(Box.createVerticalStrut(50));
-        centerPanel.add(loading);
-        
-        content.add(centerPanel, BorderLayout.CENTER);
-        
-        // Footer
-        JLabel footer = new JLabel("Version 1.0 - Java Swing MVC", SwingConstants.CENTER);
-        footer.setFont(new Font("Arial", Font.PLAIN, 10));
-        footer.setForeground(Color.WHITE);
-        footer.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        content.add(footer, BorderLayout.SOUTH);
-        
-        // Set content
+
+        // Panel background
+        JPanel content = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+            }
+        };
+        content.setBackground(Color.WHITE);
+        content.setLayout(new GridBagLayout()); // biar logo otomatis center
         setContentPane(content);
-        setSize(600, 400);
+
+        // Load logo
+        ImageIcon icon = new ImageIcon(getClass().getResource("/assets/UPN.PNG"));
+        Image scaled = icon.getImage().getScaledInstance(180, 180, Image.SCALE_SMOOTH);
+
+        // Custom JLabel untuk menggambar logo dengan alpha (transparansi)
+        JLabel fadeLogo = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+                g2.drawImage(scaled, 0, 0, getWidth(), getHeight(), null);
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(180, 180);
+            }
+        };
+
+        content.add(fadeLogo);
+
+        // Animasi fade
+        Timer fadeTimer = new Timer(50, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fadingIn) {
+                    alpha += 0.05f;
+                    if (alpha >= 1f) {
+                        alpha = 1f;
+                        fadingIn = false;
+                    }
+                } else {
+                    alpha -= 0.05f;
+                    if (alpha <= 0f) {
+                        alpha = 0f;
+                        fadingIn = true;
+                    }
+                }
+                fadeLogo.repaint();
+            }
+        });
+
+        fadeTimer.start();
+
+        // Splash screen window configs
+        setSize(1280, 832);
         setLocationRelativeTo(null);
+        setResizable(false);
         setVisible(true);
-        
-        // Timer untuk auto-close setelah 2 detik
-        Timer timer = new Timer(2000, e -> {
+
+        // Auto close splash
+        Timer closeTimer = new Timer(2000, e -> {
+            fadeTimer.stop();
             dispose();
             new LoginSelectionFrame();
         });
-        timer.setRepeats(false);
-        timer.start();
+        closeTimer.setRepeats(false);
+        closeTimer.start();
     }
 }

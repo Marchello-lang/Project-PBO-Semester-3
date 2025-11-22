@@ -118,79 +118,151 @@ public class BuildingDetailDialog extends JDialog {
      * Create rooms panel dengan rating
      */
     private JPanel createRoomsPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        
-        // Rooms list
-        DefaultListModel<String> listModel = new DefaultListModel<>();
-        
-        if (building.getRooms() != null && !building.getRooms().isEmpty()) {
-            for (Room room : building.getRooms()) {
-                String roomInfo = room.getRoomName() + " - ⭐ " + 
-                                 String.format("%.1f", room.getAverageRating());
-                listModel.addElement(roomInfo);
-            }
-        } else {
-            listModel.addElement("Belum ada data ruangan");
+
+    JPanel panel = new JPanel(new BorderLayout());
+    panel.setBackground(Color.WHITE);
+
+    // ----- ROOM LIST -----
+    DefaultListModel<String> listModel = new DefaultListModel<>();
+    JList<String> roomsList = new JList<>(listModel);
+    roomsList.setFont(new Font("Arial", Font.PLAIN, 14));
+
+    if (building.getRooms() != null && !building.getRooms().isEmpty()) {
+        for (Room room : building.getRooms()) {
+            String info = room.getRoomName() + " - ⭐ " +
+                    String.format("%.1f", room.getAverageRating());
+            listModel.addElement(info);
         }
-        
-        JList<String> roomsList = new JList<>(listModel);
-        roomsList.setFont(new Font("Arial", Font.PLAIN, 14));
-        roomsList.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JScrollPane scrollPane = new JScrollPane(roomsList);
-        
-        // Rating button
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.setBackground(Color.WHITE);
-        
-        JButton ratingButton = new JButton("Beri Rating");
-        ratingButton.setFont(new Font("Arial", Font.BOLD, 14));
-        ratingButton.setBackground(new Color(42, 115, 50));
-        ratingButton.setForeground(Color.WHITE);
-        ratingButton.setFocusPainted(false);
-        ratingButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        ratingButton.addActionListener(e -> {
-            int selectedIndex = roomsList.getSelectedIndex();
-            if (selectedIndex == -1) {
-                JOptionPane.showMessageDialog(this,
-                    "Pilih ruangan terlebih dahulu!",
-                    "Peringatan",
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            
-            Room selectedRoom = building.getRooms().get(selectedIndex);
-            
-            // Check permission
-            if (currentUser.isGuest()) {
-                JOptionPane.showMessageDialog(this,
-                    "Silakan login untuk memberikan rating!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-            
-            if (currentUser.isAdmin()) {
-                JOptionPane.showMessageDialog(this,
-                    "Admin tidak dapat memberikan rating!",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-            
-            // Open rating dialog
-            new RatingDialog(this, selectedRoom, currentUser);
-        });
-        
-        bottomPanel.add(ratingButton);
-        
-        panel.add(scrollPane, BorderLayout.CENTER);
-        panel.add(bottomPanel, BorderLayout.SOUTH);
-        
-        return panel;
+    } else {
+        listModel.addElement("Belum ada data ruangan");
     }
+
+    JScrollPane scrollPane = new JScrollPane(roomsList);
+
+    // ----- BOTTOM PANEL (Rating + CRUD) -----
+    JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    bottomPanel.setBackground(Color.WHITE);
+
+    // =============== BUTTON RATING ===============
+    JButton ratingButton = new JButton("Beri Rating");
+    styleGreenButton(ratingButton);
+
+    ratingButton.addActionListener(e -> {
+        int selectedIndex = roomsList.getSelectedIndex();
+        if (selectedIndex == -1 || building.getRooms().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Pilih ruangan dulu!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Room selectedRoom = building.getRooms().get(selectedIndex);
+
+        if (currentUser.isGuest()) {
+            JOptionPane.showMessageDialog(this,
+                    "Silakan login untuk memberi rating.",
+                    "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (currentUser.isAdmin()) {
+            JOptionPane.showMessageDialog(this,
+                    "Admin tidak bisa memberi rating.",
+                    "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        new RatingDialog(this, selectedRoom, currentUser);
+    });
+
+    bottomPanel.add(ratingButton);
+
+    // ===================== CRUD (HANYA ADMIN) ======================
+    if (currentUser.isAdmin()) {
+
+        JButton btnAdd = new JButton("Tambah");
+        JButton btnEdit = new JButton("Edit");
+        JButton btnDelete = new JButton("Hapus");
+
+        styleBlueButton(btnAdd);
+        styleBlueButton(btnEdit);
+        styleRedButton(btnDelete);
+
+        // ACTION: Tambah Room
+        btnAdd.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "TODO: Form tambah room");
+        });
+
+        // ACTION: Edit Room
+        btnEdit.addActionListener(e -> {
+            int idx = roomsList.getSelectedIndex();
+            if (idx == -1 || building.getRooms().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Pilih ruangan dulu!",
+                        "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            JOptionPane.showMessageDialog(this, "TODO: Form edit room");
+        });
+
+        // ACTION: Hapus Room
+        btnDelete.addActionListener(e -> {
+            int idx = roomsList.getSelectedIndex();
+            if (idx == -1 || building.getRooms().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Pilih ruangan dulu!",
+                        "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Room room = building.getRooms().get(idx);
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Hapus ruangan: " + room.getRoomName() + " ?",
+                    "Konfirmasi",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(this, "TODO: Delete room via controller");
+            }
+        });
+
+        bottomPanel.add(btnAdd);
+        bottomPanel.add(btnEdit);
+        bottomPanel.add(btnDelete);
+    }
+
+    panel.add(scrollPane, BorderLayout.CENTER);
+    panel.add(bottomPanel, BorderLayout.SOUTH);
+
+    return panel;
+}
+
+// Style untuk button CRUD
+    private void styleGreenButton(JButton b) {
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setBackground(new Color(42,115,50));
+        b.setForeground(Color.WHITE);
+        b.setOpaque(true);
+        b.setContentAreaFilled(false);
+    }
+
+    private void styleBlueButton(JButton b) {
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setBackground(new Color(0,123,255));
+        b.setForeground(Color.WHITE);
+        b.setOpaque(true);
+        b.setContentAreaFilled(false);
+    }
+
+    private void styleRedButton(JButton b) {
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setBackground(new Color(220,53,69));
+        b.setForeground(Color.WHITE);
+        b.setOpaque(true);
+        b.setContentAreaFilled(false);
+    }
+
     
     /**
      * Create button panel

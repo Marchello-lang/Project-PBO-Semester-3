@@ -9,7 +9,6 @@ import javax.swing.*;
  * @version 1.0
  */
 public class Main {
-    
     public static void main(String[] args) {
         // Set Look and Feel ke system default
         try {
@@ -20,9 +19,9 @@ public class Main {
         
         // Run aplikasi di Event Dispatch Thread (EDT)
         SwingUtilities.invokeLater(() -> {
-            System.out.println("===========================================");
-            System.out.println("  CAMPUS MAP APPLICATION - STARTING...");
-            System.out.println("===========================================");
+            System.out.println("============================");
+            System.out.println("  RevaUPNVJ - STARTING...");
+            System.out.println("============================");
             
             // Show splash screen
             new SplashScreen();
