@@ -88,32 +88,25 @@ public class BuildingDetailDialog extends JDialog {
         
         // Facilities
         addInfoSection(panel, "Fasilitas:", building.getFacilities());
-        
-        // Photos (placeholder)
-        JLabel photosLabel = new JLabel("Foto Gedung:");
-        photosLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        photosLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(photosLabel);
-        panel.add(Box.createVerticalStrut(5));
-        
-        JPanel photosPanel = new JPanel(new GridLayout(2, 3, 10, 10));
-        photosPanel.setBackground(Color.WHITE);
-        photosPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
-        
-        for (int i = 0; i < 6; i++) {
-            JPanel photoPlaceholder = new JPanel();
-            photoPlaceholder.setBackground(new Color(200, 200, 200));
-            photoPlaceholder.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-            
-            JLabel photoLabel = new JLabel("Foto " + (i + 1), SwingConstants.CENTER);
-            photoLabel.setForeground(Color.GRAY);
-            photoPlaceholder.add(photoLabel);
-            
-            photosPanel.add(photoPlaceholder);
-        }
-        
-        panel.add(photosPanel);
-        
+
+        // ---- BUTTON SlideshowWindow (Green Style) ----
+        JButton slideshowBtn = new JButton("Lihat Foto Gedung");
+        styleGreenButton(slideshowBtn);
+        slideshowBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        slideshowBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        SwingUtilities.invokeLater(() -> {
+            SlideshowWindow win = new SlideshowWindow(building);
+            win.setAlwaysOnTop(true);
+            win.toFront();
+        });
+
+        // Tambahkan ke panel info
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(slideshowBtn);
+        panel.add(Box.createVerticalStrut(15));
+
+
         return panel;
     }
     
@@ -249,8 +242,11 @@ public class BuildingDetailDialog extends JDialog {
         b.setFont(new Font("Arial", Font.BOLD, 14));
         b.setBackground(new Color(42,115,50));
         b.setForeground(Color.WHITE);
+
         b.setOpaque(true);
-        b.setContentAreaFilled(false);
+        b.setContentAreaFilled(true);
+        b.setBorderPainted(false);
+        b.putClientProperty("JButton.backgroundColor", new Color(42,115,50));
     }
 
     private void styleBlueButton(JButton b) {
@@ -258,7 +254,10 @@ public class BuildingDetailDialog extends JDialog {
         b.setBackground(new Color(0,123,255));
         b.setForeground(Color.WHITE);
         b.setOpaque(true);
-        b.setContentAreaFilled(false);
+        b.setContentAreaFilled(true);
+
+        b.setBorderPainted(false);
+        b.putClientProperty("JButton.backgroundColor", new Color(0,123,255));
     }
 
     private void styleRedButton(JButton b) {
@@ -266,7 +265,10 @@ public class BuildingDetailDialog extends JDialog {
         b.setBackground(new Color(220,53,69));
         b.setForeground(Color.WHITE);
         b.setOpaque(true);
-        b.setContentAreaFilled(false);
+        b.setContentAreaFilled(true);
+
+        b.setBorderPainted(false);
+        b.putClientProperty("JButton.backgroundColor", new Color(20,53,69));
     }
 
     

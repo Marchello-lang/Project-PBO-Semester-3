@@ -11,9 +11,9 @@ import java.sql.SQLException;
 public class DatabaseConfig {
     
     // Database credentials - GANTI sesuai konfigurasi MySQL kamu!
-    private static final String URL = "jdbc:mysql://localhost:3306/revaUPNVJ?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/revaupnvj?useSSL=false&serverTimezone=UTC";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = ""; // ⚠️ GANTI dengan password MySQL kamu!
+    private static final String PASSWORD = "";
     
     // Driver class
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";

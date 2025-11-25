@@ -58,6 +58,8 @@ public class EditRoomDialog extends JDialog {
         saveButton.setBackground(new Color(42, 115, 50));
         saveButton.setForeground(Color.WHITE);
         saveButton.setFocusPainted(false);
+        saveButton.setContentAreaFilled(false);
+        saveButton.setOpaque(true);
     }
 
     private void createLayout() {

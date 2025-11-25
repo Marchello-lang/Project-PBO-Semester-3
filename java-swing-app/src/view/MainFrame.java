@@ -1,279 +1,274 @@
 package view;
 
 import controller.MainController;
-import model.User;
 import model.Building;
+import model.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.List;
 
-/**
- * Main Frame - Tampilan utama dengan peta kampus
- */
 public class MainFrame extends JFrame {
-    
+
     private User currentUser;
     private MainController controller = new MainController();
     private List<Building> buildings;
-    
+
+    private Image mapImage;
+    private JPanel mapPanel;
+
     public MainFrame(User user) {
         this.currentUser = user;
         this.buildings = controller.getBuildings();
-        
-        setTitle("RevaUPNVJ - " + user.getUsername() + " (" + getRoleDisplay() + ")");
-        setSize(1200, 800);
+
+        setTitle("RevaUPNVJ - " + user.getUsername());
+        setSize(1400, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
-        // Main panel
+
+        loadMapImage();
+
         JPanel mainPanel = new JPanel(new BorderLayout());
-        
-        // Header
-        JPanel headerPanel = createHeaderPanel();
-        
-        // Map panel (center)
-        JPanel mapPanel = createMapPanel();
-        
-        // Sidebar (info panel)
-        JPanel sidebarPanel = createSidebarPanel();
-        
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
-        mainPanel.add(mapPanel, BorderLayout.CENTER);
-        mainPanel.add(sidebarPanel, BorderLayout.EAST);
-        
+
+        mainPanel.add(createHeaderPanel(), BorderLayout.NORTH);
+        mainPanel.add(createMapPanelWithButtons(), BorderLayout.CENTER);
+        mainPanel.add(createSidebarPanel(), BorderLayout.EAST);
+
         add(mainPanel);
         setVisible(true);
     }
-    
-    /**
-     * Create header panel
-     */
-    private JPanel createHeaderPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(getFacultyColor());
-        panel.setPreferredSize(new Dimension(1200, 70));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        // Logo
-        ImageIcon icon = new ImageIcon(getClass().getResource("/assets/UPN.PNG"));
-        Image img = icon.getImage().getScaledInstance(45, 45, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(img);
-        JLabel iconLabel = new JLabel(scaledIcon);
-
-        // Text
-        JLabel titleLabel = new JLabel("RevaUPNVJ");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setForeground(Color.WHITE);
-
-        // LEFT group (logo + title)
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        leftPanel.setOpaque(false);
-        leftPanel.add(iconLabel);
-        leftPanel.add(titleLabel);
-
-        // User info
-        JPanel userInfoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        userInfoPanel.setOpaque(false);
-
-        String userText = currentUser.getUsername();
-        if (!currentUser.isGuest() && !currentUser.isAdmin()) {
-            userText += " - " + currentUser.getFaculty();
+    /* -------------------------------------------------------------
+       LOAD MAP IMAGE
+    ------------------------------------------------------------- */
+    private void loadMapImage() {
+        try {
+            mapImage = new ImageIcon(getClass().getResource("/assets/MapColored.jpg")).getImage();
+        } catch (Exception e) {
+            System.out.println("Error loading map image: " + e.getMessage());
         }
+    }
 
-        JLabel userLabel = new JLabel(userText);
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        userLabel.setForeground(Color.WHITE);
+    /* -------------------------------------------------------------
+       MAP PANEL (CampusMap digabung disini)
+    ------------------------------------------------------------- */
+    private JPanel createMapPanelWithButtons() {
 
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setBackground(Color.WHITE);
-        logoutButton.setForeground(getFacultyColor());
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 12));
-        logoutButton.setFocusPainted(false);
-        logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        logoutButton.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                "Apakah Anda yakin ingin logout?",
-                "Konfirmasi Logout",
-                JOptionPane.YES_NO_OPTION);
+        mapPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (mapImage != null) {
+                    g.drawImage(mapImage, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
 
-            if (confirm == JOptionPane.YES_OPTION) {
-                dispose();
-                new LoginSelectionFrame();
+        mapPanel.setLayout(null);
+        mapPanel.setBackground(Color.WHITE);
+
+        // Tambahkan tombol gedung dari database
+        addDatabaseBuildingButtons();
+
+        return mapPanel;
+    }
+
+    /* -------------------------------------------------------------
+       MENAMBAHKAN TOMBOL GEDUNG (koordinat dari CampusMap)
+    ------------------------------------------------------------- */
+    private void addDatabaseBuildingButtons() {
+
+        int[][] coords = {
+                // id    x   y   w   h
+                {1, 190, 267, 50, 35},
+                {2, 227, 187, 50, 35},
+                {3, 260, 284, 50, 35},
+                {4, 370, 94, 50, 35},
+                {5, 390, 182, 50, 35},
+                {6, 404, 257, 50, 35},
+                {7, 500, 273, 60, 40},
+                {8, 355, 365, 50, 35},
+                {9, 272, 430, 50, 35},
+                {10, 229, 542, 50, 35},
+                {11, 405, 496, 50, 35},
+                {12, 437, 415, 50, 35},
+                {13, 545, 382, 50, 35},
+                {14, 538, 148, 50, 35},
+                {15, 618, 284, 50, 35},
+                {16, 636, 416, 50, 35},
+                {17, 762, 416, 50, 35},
+                {18, 503, 496, 50, 35},
+                {19, 830, 381, 60, 35},
+                {20, 680, 158, 60, 35},
+                {21, 796, 278, 50, 35},
+                {22, 338, 478, 50, 35},
+                {23, 485, 383, 50, 35},
+        };
+
+        for (Building b : buildings) {
+            int id = b.getBuildingId();
+
+            if (id < 1 || id > coords.length) continue;
+
+            int[] c = coords[id - 1];
+            JButton btn = createBuildingButton(b, c[1], c[2], c[3], c[4]);
+
+            mapPanel.add(btn);
+        }
+    }
+
+    /* -------------------------------------------------------------
+       BUTTON GEDUNG (gabungan UI CampusMap + data MainFrame)
+    ------------------------------------------------------------- */
+    private JButton createBuildingButton(Building b, int x, int y, int w, int h) {
+
+        JButton btn = new JButton(String.valueOf(b.getBuildingId()));
+        btn.setBounds(x, y, w, h);
+        btn.setFont(new Font("Arial", Font.BOLD, 14));
+        btn.setOpaque(true);
+        btn.setBackground(new Color(255, 255, 255, 230));
+        btn.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(new Color(42, 155, 50, 230));
+                btn.setForeground(Color.WHITE);
+            }
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(new Color(255, 255, 255, 230));
+                btn.setForeground(Color.BLACK);
             }
         });
 
-        userInfoPanel.add(userLabel);
-        userInfoPanel.add(Box.createHorizontalStrut(15));
-        userInfoPanel.add(logoutButton);
+        btn.addActionListener(e -> {
+            // buka detail gedung versi database
+            Building detail = controller.getBuildingDetail(b.getBuildingId());
+            new BuildingDetailDialog(this, detail, currentUser);
+        });
 
-        panel.add(leftPanel, BorderLayout.WEST);
-        panel.add(userInfoPanel, BorderLayout.EAST);
+        return btn;
+    }
+
+    /* -------------------------------------------------------------
+       HEADER PANEL (tetap sama)
+    ------------------------------------------------------------- */
+    private JPanel createHeaderPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(new Color(42, 115, 50));
+        panel.setPreferredSize(new Dimension(1400, 70));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        JLabel title = new JLabel("RevaUPNVJ");
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        title.setForeground(Color.WHITE);
+
+        panel.add(title, BorderLayout.WEST);
 
         return panel;
     }
-    
+
+    /* -------------------------------------------------------------
+       SIDEBAR PANEL (tetap sama)
+    ------------------------------------------------------------- */
     /**
-     * Create map panel (placeholder - implement actual map)
-     */
-    private JPanel createMapPanel() {
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setLayout(new GridBagLayout());
-        
-        // TODO: Implement actual map dengan clickable buildings
-        // Untuk sementara, buat grid of buttons untuk setiap building
-        
-        JPanel buildingsGrid = new JPanel(new GridLayout(3, 4, 10, 10));
-        buildingsGrid.setBackground(Color.WHITE);
-        
-        for (Building building : buildings) {
-            JButton buildingButton = new JButton("<html><center>" + building.getBuildingName() + 
-                                                 "<br>⭐ " + String.format("%.1f", building.getAverageRating()) +
-                                                 "</center></html>");
-            buildingButton.setFont(new Font("Arial", Font.BOLD, 12));
-            buildingButton.setPreferredSize(new Dimension(150, 100));
-            
-            // Set color based on faculty
-            Color buildingColor = getBuildingColor(building.getFaculty());
-            buildingButton.setBackground(buildingColor);
-            buildingButton.setForeground(Color.WHITE);
-            buildingButton.setFocusPainted(false);
-            buildingButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            
-            buildingButton.addActionListener(e -> {
-                // Show building detail
-                Building detail = controller.getBuildingDetail(building.getBuildingId());
-                new BuildingDetailDialog(this, detail, currentUser);
-            });
-            
-            buildingsGrid.add(buildingButton);
-        }
-        
-        panel.add(buildingsGrid);
-        
-        return panel;
-    }
-    
-    /**
-     * Create sidebar panel
+     * Sidebar panel (mengambil versi CampusMap)
      */
     private JPanel createSidebarPanel() {
-        JPanel panel = new JPanel();
-        panel.setPreferredSize(new Dimension(250, 800));
-        panel.setBackground(new Color(245, 245, 245));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-        
-        // Info text
-        JLabel infoLabel = new JLabel("INFO");
-        infoLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        infoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        JTextArea infoText = new JTextArea();
-        infoText.setEditable(false);
-        infoText.setLineWrap(true);
-        infoText.setWrapStyleWord(true);
-        infoText.setFont(new Font("Arial", Font.PLAIN, 12));
-        infoText.setBackground(new Color(245, 245, 245));
-        
-        String info = "";
-        if (currentUser.isGuest()) {
-            info = "Mode Guest:\n\n" +
-                   "• Peta ditampilkan dengan warna abu-abu\n" +
-                   "• Anda dapat melihat info gedung\n" +
-                   "• Tidak dapat memberikan rating\n\n" +
-                   "Silakan login untuk fitur lengkap.";
-        } else if (currentUser.isAdmin()) {
-            info = "Mode Admin:\n\n" +
-                   "• Kelola info gedung\n" +
-                   "• Upload foto\n" +
-                   "• Edit deskripsi & fasilitas\n" +
-                   "• Tidak dapat memberikan rating";
-        } else {
-            info = "Mode Mahasiswa:\n\n" +
-                   "• Peta dengan warna " + currentUser.getFaculty() + "\n" +
-                   "• Klik gedung untuk detail\n" +
-                   "• Beri rating untuk:\n" +
-                   "  - Gedung " + currentUser.getFaculty() + "\n" +
-                   "  - Fasilitas umum";
-        }
-        
-        infoText.setText(info);
-        infoText.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        // Legend
-        JLabel legendLabel = new JLabel("LEGENDA:");
-        legendLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        legendLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        legendLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
-        
-        panel.add(infoLabel);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(infoText);
-        panel.add(Box.createVerticalStrut(15));
-        panel.add(legendLabel);
-        
-        // Add faculty colors
-        String[] faculties = {"FIK", "FK", "FH", "FEB", "FISIP", "UMUM"};
-        for (String faculty : faculties) {
-            JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            colorPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-            colorPanel.setBackground(new Color(245, 245, 245));
-            
-            JPanel colorBox = new JPanel();
-            colorBox.setPreferredSize(new Dimension(20, 20));
-            colorBox.setBackground(getBuildingColor(faculty));
-            
-            JLabel colorLabel = new JLabel(" " + faculty);
-            colorLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-            
-            colorPanel.add(colorBox);
-            colorPanel.add(colorLabel);
-            panel.add(colorPanel);
-        }
-        
-        return panel;
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setPreferredSize(new Dimension(380, 0));
+        sidebar.setBackground(Color.WHITE);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+
+        // TITLE
+        JLabel title = new JLabel("UPNVJ");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        title.setForeground(new Color(42, 155, 50));
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(title);
+        content.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // DESCRIPTION
+        JTextArea desc = new JTextArea(
+                "UPNVJ adalah Perguruan Tinggi Negeri (PTN) yang berlokasi di Jakarta, " +
+                        "resmi sejak tahun 2014. UPNVJ identik dengan sebutan 'Kampus Bela Negara', " +
+                        "berfokus pada pengembangan akademik sambil menanamkan nilai-nilai kebangsaan.\n\n" +
+                        "UPNVJ menawarkan berbagai disiplin ilmu, mulai dari teknik, kesehatan, " +
+                        "hingga ilmu sosial dan ekonomi. UPNVJ menghasilkan lulusan unggul, " +
+                        "berintegritas, dan siap menjadi agen perubahan."
+        );
+
+        desc.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        desc.setLineWrap(true);
+        desc.setWrapStyleWord(true);
+        desc.setEditable(false);
+        desc.setOpaque(false);
+        desc.setForeground(new Color(60, 60, 60));
+        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(desc);
+        content.add(Box.createRigidArea(new Dimension(0, 30)));
+
+        // DIVIDER
+        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+        separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 2));
+        separator.setAlignmentX(Component.LEFT_ALIGNMENT);
+        separator.setBackground(new Color(220, 220, 220));
+        content.add(separator);
+        content.add(Box.createRigidArea(new Dimension(0, 25)));
+
+        // LEGEND TITLE
+        JLabel legendTitle = new JLabel("LEGENDA");
+        legendTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        legendTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(legendTitle);
+        content.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        // LEGEND ITEMS (warna fakultas)
+        content.add(createLegendItem("Rektorat", new Color(42, 155, 50)));
+        content.add(createLegendItem("Fakultas Kedokteran", new Color(0, 138, 61)));
+        content.add(createLegendItem("FEB", new Color(255, 211, 0)));
+        content.add(createLegendItem("FISIP", new Color(67, 8, 132)));
+        content.add(createLegendItem("Fakultas Hukum", new Color(173, 0, 0)));
+        content.add(createLegendItem("FIK", new Color(255, 101, 1)));
+        content.add(createLegendItem("Fasilitas Umum", new Color(168, 168, 168)));
+        content.add(createLegendItem("Gedung Wirausaha", new Color(63, 218, 223)));
+        content.add(createLegendItem("Kantin", new Color(228, 227, 134)));
+        content.add(createLegendItem("Perpustakaan", new Color(255, 107, 107)));
+
+        content.add(Box.createVerticalGlue());
+
+        JScrollPane scrollPane = new JScrollPane(content);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        sidebar.add(scrollPane, BorderLayout.CENTER);
+        return sidebar;
     }
-    
-    /**
-     * Get user role display text
-     */
-    private String getRoleDisplay() {
-        if (currentUser.isGuest()) return "Guest";
-        if (currentUser.isAdmin()) return "Admin";
-        return currentUser.getFaculty();
+
+    private JPanel createLegendItem(String name, Color color) {
+        JPanel item = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
+        item.setBackground(Color.WHITE);
+        item.setAlignmentX(Component.LEFT_ALIGNMENT);
+        item.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+
+        JPanel colorBox = new JPanel();
+        colorBox.setBackground(color);
+        colorBox.setPreferredSize(new Dimension(30, 24));
+        colorBox.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 150), 1));
+
+        JLabel label = new JLabel(name);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        item.add(colorBox);
+        item.add(label);
+        return item;
     }
-    
-    /**
-     * Get faculty/user color
-     */
-    private Color getFacultyColor() {
-        if (currentUser.isGuest()) {
-            return new Color(128, 128, 128); // Abu-abu
-        }
-        if (currentUser.isAdmin()) {
-            return new Color(42, 115, 50); // Hijau default
-        }
-        return getBuildingColor(currentUser.getFaculty());
-    }
-    
-    /**
-     * Get building color based on faculty
-     */
-    private Color getBuildingColor(String faculty) {
-        if (currentUser.isGuest()) {
-            return new Color(200, 200, 200); // Abu-abu terang untuk guest
-        }
-        
-        switch (faculty) {
-            case "FIK": return new Color(42, 115, 50);      // Hijau
-            case "FK": return new Color(220, 53, 69);       // Merah
-            case "FH": return new Color(255, 193, 7);       // Kuning
-            case "FEB": return new Color(0, 123, 255);      // Biru
-            case "FISIP": return new Color(108, 117, 125);  // Abu-abu gelap
-            case "UMUM": return new Color(128, 128, 128);   // Abu-abu
-            default: return Color.GRAY;
-        }
-    }
+
 }
