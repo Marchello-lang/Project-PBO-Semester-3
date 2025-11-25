@@ -2,6 +2,7 @@ package dao;
 
 import config.DatabaseConfig;
 import model.Building;
+import model.Room;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,7 +13,8 @@ import java.util.List;
  * Handle database operations untuk buildings table
  */
 public class BuildingDAO {
-    
+
+    private RoomDAO roomDAO = new RoomDAO();
     private Connection getConnection() throws SQLException {
         return DatabaseConfig.getInstance().getConnection();
     }
@@ -105,5 +107,12 @@ public class BuildingDAO {
         building.setFacilities(rs.getString("facilities"));
         building.setFaculty(rs.getString("faculty"));
         return building;
+    }
+
+    public void reloadRooms(Building building) {
+        if (building == null) return;
+
+        List<Room> rooms = roomDAO.getRoomsByBuildingId(building.getBuildingId());
+        building.setRooms(rooms);
     }
 }

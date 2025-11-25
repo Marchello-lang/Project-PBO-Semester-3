@@ -3,6 +3,8 @@ package view;
 import model.Building;
 import model.Room;
 import model.User;
+import controller.AdminController;
+import dao.BuildingDAO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +16,7 @@ public class BuildingDetailDialog extends JDialog {
     
     private Building building;
     private User currentUser;
+    private BuildingDAO buildingDAO = new BuildingDAO();
     
     public BuildingDetailDialog(JFrame parent, Building building, User user) {
         super(parent, building.getBuildingName(), true);
@@ -189,8 +192,13 @@ public class BuildingDetailDialog extends JDialog {
 
         // ACTION: Tambah Room
         btnAdd.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "TODO: Form tambah room");
+            // Kita harus membuat AdminController di sini atau menjadikannya field class
+            AdminController adminController = new AdminController();
+
+            // Panggil dialog tambah ruangan. 'this' adalah BuildingDetailDialog
+            new AddRoomDialog(this, adminController, building);
         });
+
 
         // ACTION: Edit Room
         btnEdit.addActionListener(e -> {
@@ -201,7 +209,12 @@ public class BuildingDetailDialog extends JDialog {
                 return;
             }
 
-            JOptionPane.showMessageDialog(this, "TODO: Form edit room");
+            Room selectedRoom = building.getRooms().get(idx);
+
+            AdminController adminController = new AdminController();
+
+            // PANGGIL EditRoomDialog
+            new EditRoomDialog(this, adminController, selectedRoom);
         });
 
         // ACTION: Hapus Room
@@ -215,16 +228,9 @@ public class BuildingDetailDialog extends JDialog {
 
             Room room = building.getRooms().get(idx);
 
-            int confirm = JOptionPane.showConfirmDialog(
-                    this,
-                    "Hapus ruangan: " + room.getRoomName() + " ?",
-                    "Konfirmasi",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (confirm == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(this, "TODO: Delete room via controller");
-            }
+            // Ganti dialog konfirmasi default menjadi pemanggilan DeleteRoomDialog
+            AdminController adminController = new AdminController();
+            new DeleteRoomDialog(this, adminController, room);
         });
 
         bottomPanel.add(btnAdd);
@@ -304,7 +310,35 @@ public class BuildingDetailDialog extends JDialog {
         panel.add(contentArea);
         panel.add(Box.createVerticalStrut(15));
     }
-    
+
+    public void refreshDataAndUI() {
+        // 1. Reload data Rooms ke objek Building dari Database
+        buildingDAO.reloadRooms(this.building);
+
+        // 2. Muat ulang tabbed pane
+        JTabbedPane tabbedPane = (JTabbedPane) ((BorderLayout) this.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER);
+
+        if (tabbedPane == null) return;
+
+        int roomsTabIndex = tabbedPane.indexOfTab("Ruangan & Rating");
+
+        if (roomsTabIndex != -1) {
+            // Hapus dan ganti panel ruangan lama dengan yang baru (data ter-reload)
+            tabbedPane.removeTabAt(roomsTabIndex);
+            tabbedPane.insertTab("Ruangan & Rating", null, createRoomsPanel(), null, roomsTabIndex);
+            tabbedPane.setSelectedIndex(roomsTabIndex); // Kembali ke tab ruangan
+        }
+
+        // 3. Perbarui rating header (jika diperlukan)
+        // Kita juga perlu me-reload rating building secara keseluruhan
+
+        // (Logika reload rating building secara total tidak ada di BuildingDAO saat ini,
+        //  tapi untuk ruangan sudah cukup)
+
+        this.revalidate();
+        this.repaint();
+    }
+
     /**
      * Get building color
      */
